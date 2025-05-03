@@ -12,8 +12,6 @@
  * @copyright Copyright (c) 2025 by Niederer Engineering GmbH
  */
 
- using namespace HolisticSolutions::SimpleStateMachine;
-
 static SSM_STATE_HANDLER(NullState);
 static const tSSM_State NullState = SSM_STATE_DESCRIBE("NullState", NullState);
 
