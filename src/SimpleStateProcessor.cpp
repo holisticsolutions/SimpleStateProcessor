@@ -1,4 +1,4 @@
-#include <SimpleStateMachine.h>
+#include <SimpleStateProcessor.h>
 
 /**
  * @file
@@ -6,16 +6,16 @@
  * 
  *          This class provides a minimum state machine processor, that can run through
  *          an array of states. The states are injected through an array of state 
- *          descriptions. \see tFSM_State
+ *          descriptions. \see tSSP_State
  * 
  * @author    Ueli Niederer, ueli.niederer@niederer-engineering.ch         
  * @copyright Copyright (c) 2025 by Niederer Engineering GmbH
  */
 
-static SSM_STATE_HANDLER(NullState);
-static const tSSM_State NullState = SSM_STATE_DESCRIBE("NullState", NullState);
+static SSP_STATE_HANDLER(NullState);
+static const tSSP_State NullState = SSP_STATE_DESCRIBE("NullState", NullState);
 
-SimpleStateMachine::SimpleStateMachine(uintptr_t init, const tSSM_State *states, void *context) {
+SimpleStateProcessor::SimpleStateProcessor(uintptr_t init, const tSSP_State *states, void *context) {
     m_states = states;
     while (states->name != 0) {
         m_states_len++;
@@ -28,26 +28,26 @@ SimpleStateMachine::SimpleStateMachine(uintptr_t init, const tSSM_State *states,
     m_context = context;
 }
 
-SimpleStateMachine::~SimpleStateMachine() {
+SimpleStateProcessor::~SimpleStateProcessor() {
 
 }
 
-void SimpleStateMachine::reset() {
-    m_state_curr->handler(this, SSM_REASON_EXIT, m_context);
+void SimpleStateProcessor::reset() {
+    m_state_curr->handler(this, SSP_REASON_EXIT, m_context);
     m_state_curr = &NullState;
     m_state_next = m_state_init;
 }
 
-int SimpleStateMachine::run() {
+int SimpleStateProcessor::run() {
     if (m_state_next != m_state_curr) {
-        m_state_curr->handler(this, SSM_REASON_EXIT, m_context);
-        m_state_next->handler(this, SSM_REASON_ENTER, m_context);
+        m_state_curr->handler(this, SSP_REASON_EXIT, m_context);
+        m_state_next->handler(this, SSP_REASON_ENTER, m_context);
         m_state_curr = m_state_next;
     }
-    return m_state_curr->handler(this, SSM_REASON_DO, m_context);
+    return m_state_curr->handler(this, SSP_REASON_DO, m_context);
 }
 
-bool SimpleStateMachine::NextStateSet(uintptr_t nextState) {
+bool SimpleStateProcessor::NextStateSet(uintptr_t nextState) {
     if (nextState >= m_states_len) {
         return false;
     }
@@ -56,14 +56,14 @@ bool SimpleStateMachine::NextStateSet(uintptr_t nextState) {
     return true;
 }
 
-uintptr_t SimpleStateMachine::CurrentStateGet() {
+uintptr_t SimpleStateProcessor::CurrentStateGet() {
     return m_state_curr - m_states;
 }
 
-const char *SimpleStateMachine::CurrentStateNameGet() {
+const char *SimpleStateProcessor::CurrentStateNameGet() {
     return m_state_curr->name;
 }
 
-static SSM_STATE_HANDLER(NullState) {
+static SSP_STATE_HANDLER(NullState) {
     return 0;
 }
