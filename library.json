@@ -1,6 +1,6 @@
 {
   "name": "SimpleStateProcessor",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "A simple state machine processor",
   "keywords": "FSM, state machine, finite state machine",
   "repository":
