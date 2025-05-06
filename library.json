@@ -1,15 +1,13 @@
 {
   "name": "SimpleStateProcessor",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "A simple state machine processor",
   "keywords": "FSM, state machine, finite state machine",
-  "repository":
-  {
+  "repository": {
     "type": "git",
     "url": "https://github.com/holisticsolutions/SimpleStateProcessor"
   },
-  "authors":
-  [
+  "authors": [
     {
       "name": "Ueli Niederer",
       "email": "ueli.niederer@niederer-engineering.ch",
