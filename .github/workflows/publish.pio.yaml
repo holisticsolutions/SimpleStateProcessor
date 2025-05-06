@@ -1,0 +1,74 @@
+name: Build and Release PlatformIO Library
+
+on:
+  push:
+    tags:
+      - 'build/v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          VERSION="${TAG#build/}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Update library.json
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          jq --arg version "${VERSION#v}" '.version = $version' library.json > tmp.json && mv tmp.json library.json
+
+      - name: Update library.properties
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          sed -i "s/^version=.*/version=$VERSION/" library.properties
+
+      - name: Commit version bump
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          git config user.name "Build Pipeline"
+          git config user.email "build@niederer-engineering.ch"
+          git checkout -b release-temp
+          git add library.json library.properties
+          git commit -m "Bump version to $VERSION"
+
+      - name: Create and push release tag
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          git tag "release/$VERSION"
+          git push origin release/$VERSION
+
+      - name: Push updated branch (optional, if you want the commit on main)
+        run: |
+          git push origin HEAD:master
+
+      - name: Delete build tag from remote
+        env:
+          TAG_REF: ${{ github.ref }}
+        run: |
+          TAG_NAME="${TAG_REF##refs/tags/}"
+          echo "Deleting remote tag: $TAG_NAME"
+          git push origin ":refs/tags/$TAG_NAME"
+      
+      - name: Publish to PlatformIO
+        env:
+          PLATFORMIO_AUTH_TOKEN: ${{ secrets.PLATFORMIO_AUTH_TOKEN }}
+        run: pio package publish --non-interactive
