@@ -15,7 +15,7 @@
 static SSP_STATE_HANDLER(NullState);
 static const tSSP_State NullState = SSP_STATE_DESCRIBE("NullState", NullState);
 
-SimpleStateProcessor::SimpleStateProcessor(uintptr_t init, const tSSP_State *states, void *context) {
+SimpleStateProcessor::SimpleStateProcessor(uintptr_t init, const tSSP_State *states, void *context) : m_states_len(0) {
     m_states = states;
     while (states->name != 0) {
         m_states_len++;
