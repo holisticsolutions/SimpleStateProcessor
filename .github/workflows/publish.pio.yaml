@@ -48,7 +48,11 @@ jobs:
           git config user.email "build@niederer-engineering.ch"
           git checkout -b release-temp
           git add library.json library.properties
-          git commit -m "Bump version to $VERSION"
+          if git diff --cached --quiet; then
+            echo "No changes to commit, skipping."
+          else
+            git commit -m "Bump version to $VERSION"
+          fi
 
       - name: Create and push release tag
         run: |
