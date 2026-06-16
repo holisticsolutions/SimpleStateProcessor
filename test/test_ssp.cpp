@@ -28,6 +28,8 @@ static FunctionEmulator StateUnknownStub("StateUnknown");
 static FunctionEmulator StateAStub("StateA");
 static FunctionEmulator StateBStub("StateB");
 
+uintptr_t enter_state = STATE_UNKNOWN;
+
 void setUp(void) {
 }
 
@@ -110,6 +112,21 @@ void test_switch_to_last_state(void) {
     TEST_ASSERT_EQUAL(SSP_REASON_ENTER, StateBStub.getArguments().resolve<tSSP_Reason>(0, 1));
 }
 
+void test_call_getstate_on_enter(void){
+    SimpleStateProcessor uut(STATE_UNKNOWN, states, &context);
+
+    StateUnknownStub.reset();
+    StateAStub.reset();
+    StateBStub.reset();
+
+    uut.run();
+    bool success = uut.NextStateSet(STATE_A);
+    uut.run();
+
+    TEST_ASSERT_EQUAL(true, success);
+    TEST_ASSERT_EQUAL(STATE_A, enter_state);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
 
@@ -117,6 +134,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_switch_to_inital_state_upon_first_run);
     RUN_TEST(test_reason_and_context_are_correctly_set);
     RUN_TEST(test_switch_to_last_state);
+    RUN_TEST(test_call_getstate_on_enter);
 
     UNITY_END();
 }
@@ -128,6 +146,10 @@ static SSP_STATE_HANDLER(StateUnknown) {
 }
 
 static SSP_STATE_HANDLER(StateA) {
+    if (reason == SSP_REASON_ENTER)
+    {
+        enter_state = fsm->CurrentStateGet(); 
+    }
     StateAStub.recordFunctionCall();
     StateAStub.captureArgs(fsm, reason, context);
     return 0;
