@@ -41,8 +41,8 @@ void SimpleStateProcessor::reset() {
 int SimpleStateProcessor::run() {
     if (m_state_next != m_state_curr) {
         m_state_curr->handler(this, SSP_REASON_EXIT, m_context);
-        m_state_curr = m_state_next;
         m_state_next->handler(this, SSP_REASON_ENTER, m_context);
+        m_state_curr = m_state_next;
     }
     return m_state_curr->handler(this, SSP_REASON_DO, m_context);
 }
